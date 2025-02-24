@@ -4,6 +4,7 @@ from win32com.client import Dispatch
 from tqdm import tqdm
 import pythoncom
 
+
 def break_links_with_win32(file_path):
     pythoncom.CoInitialize()  # Necessary for multi-threading
     excel = Dispatch("Excel.Application")
@@ -21,9 +22,12 @@ def break_links_with_win32(file_path):
     wb.Close()
     excel.Quit()
 
+
 def delete_hidden_sheets_openpyxl(file_path):
     wb = load_workbook(file_path)
-    hidden_sheets = [sheet.title for sheet in wb.worksheets if sheet.sheet_state == 'hidden']
+    hidden_sheets = [
+        sheet.title for sheet in wb.worksheets if sheet.sheet_state == "hidden"
+    ]
 
     if not hidden_sheets:
         print("No hidden sheets found.")
@@ -38,9 +42,12 @@ def delete_hidden_sheets_openpyxl(file_path):
         wb.save(new_file_path)
         print(f"File saved as: {new_file_path}")
     except PermissionError:
-        print("Error: Unable to save the file. Please check permissions or if the file is open.")
+        print(
+            "Error: Unable to save the file. Please check permissions or if the file is open."
+        )
     finally:
         wb.close()
+
 
 def delete_erroneous_names_with_win32(file_path):
     pythoncom.CoInitialize()
@@ -56,7 +63,15 @@ def delete_erroneous_names_with_win32(file_path):
             try:
                 name = names.Item(i)
                 refers_to = name.RefersTo
-                if '#REF!' in refers_to or 'http' in refers_to or '#N/A' in refers_to:
+                if (
+                    "#REF!" in refers_to
+                    or "#REF!" in refers_to
+                    or "#REF!REF!" in refers_to
+                    or "http" in refers_to
+                    or "#N/A" in refers_to
+                    or "NA()" in refers_to
+                    or "#NAME?" in refers_to
+                ):
                     name.Delete()
             except Exception as e:
                 print(f"Error processing name index {i}: {e}")
@@ -67,6 +82,7 @@ def delete_erroneous_names_with_win32(file_path):
         wb.Close()
         excel.Quit()
     print("Erroneous names deleted successfully.")
+
 
 def main():
     print("Welcome to Enhanced Excel Cleaner")
@@ -96,6 +112,7 @@ def main():
         print("Invalid choice. Exiting.")
 
     print(f"Processing complete for file: {file_path}")
+
 
 if __name__ == "__main__":
     main()
